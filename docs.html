@@ -110,7 +110,11 @@
                             <h2 class="section-title">Architecture</h2>
                             <div class="section-block">
                                 <p>
-                                    <a href="https://prismjs.com/" target="_blank">PrismJS</a> is used as the syntax highlighter here. You can <a href="https://prismjs.com/download.html" target="_blank">build your own version</a> via their website should you need to.
+                                    Our application is built using the Flask framework. The user will interact with our web application and upload their files that they want sythesized. Once the application receives the files from the user, the files will be pre processed and then given to our Parser.<br><br>
+                                    The Parser converts the LaTeX document into Speech Sythesis Markup Language (SSML). SSML is used since it's a markup language for speech sythesis applications. It allows us to control how words, sentences are pronunced and gives us more control of how the document will be read.<br><br>
+                                    Once the Parser converts the files to SSML format, the new SSML document is fed to Amazon Polly which converts it into a .mp3 file. Then stored into an S3 bucket. To access the .mp3 file, a generaged presigned URL is created so the user can interact with the S3 bucket temporarily to grab their audio file which they can then download.<br><br>
+                                    <b>Note: </b> Elastic Beanstalk is used in production matters, currently we do not have the application running on this instance.
+                                    <img src = "assets/images/architecture.png" height = "400px" width = "600px">
                                 </p>
                                 
                             </div>
@@ -123,6 +127,24 @@
                                 </p>
                             </div>
                             <!-- End of Frontend Section -->
+
+                            <!-- Backend Section -->
+                            <div id="backend" class="section-block">
+                                <h3 class="block-title">Backend</h3>
+                                <p>
+                                    Backend Info here
+                                </p>
+                            </div>
+                            <!-- End of Backend Section -->
+
+                            <!-- Mathmode Section -->
+                            <div id="mathmode" class="section-block">
+                                <h3 class="block-title">Mathmode</h3>
+                                <p>
+                                    Mathmode Info here
+                                </p>
+                            </div>
+                            <!-- End of Mathmode Section -->
                         </section>
                         <!-- End of Architecture Section -->
 
@@ -130,7 +152,8 @@
                         <section id="contributing" class="doc-section">
                             <h2 class="section-title">Contributing</h2>
                             <div class="section-block">
-                                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi nec imperdiet turpis. Curabitur aliquet pulvinar ultrices. Etiam at posuere leo. Proin ultrices ex et dapibus feugiat <a href="#">link example</a> aenean purus leo, faucibus at elit vel, aliquet scelerisque dui. Etiam quis elit euismod, imperdiet augue sit amet, imperdiet odio. Aenean sem erat, hendrerit  eu gravida id, dignissim ut ante. Nam consequat porttitor libero euismod congue. 
+                                <p>
+                                    This project is available under the MIT license and contributions are welcomed. If you would like to contribute, please fork the repository and create a PR. We would be happy to review it and merge your contribution. 
                                 </p>
                             </div>
                         </section>
