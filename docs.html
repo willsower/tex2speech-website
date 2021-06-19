@@ -56,29 +56,38 @@
             <div class="doc-body row">
                 <div class="doc-content col-md-9 col-12 order-1">
                     <div class="content-inner">
+                        <!-- Getting Started Section -->
                         <section id="getting-started-section" class="doc-section">
                             <h2 class="section-title">Getting Started</h2>
                             <div class="section-block">
                                 <p>
-                                    Documentation of the Tex2Speech project. 
+                                    Tex2Speech is a flexible, user-friendly, easy to use text-to-speech web application for converting LaTeX documents to spoken audio (.mp3 format).
                                 </p>
                                 <a href="https://github.com/hutchresearch/latex2speech" class="u-align-center u-btn  u-button-style u-custom-color-2 u-radius-10" target="_blank"><i class="fab fa-github"></i> GitHub</a>
                             </div>
-                        </section><!--//doc-section-->
-                        <section id="installation-section" class="doc-section">
-                            <h2 class="section-title">Installation</h2>
-                            <div id="step1"  class="section-block">
-                                <h3 class="block-title">Step One</h3>
-                                <p>Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis.
+                            <!-- Installation SubSection -->
+                            <div id="installation"  class="section-block">
+                                <h3 class="block-title">Installation</h3>
+                                <p>To run the application locally, you need to have an Amazon Web Services account. Please create one before continuing. Once you have your AWS account, create/get your AWS access keys which is necessary to make programmatic calls to AWS. You will also need to have Python/Pip installed.
                                 </p>
-                                <div class="code-block">
-                                    <h6>Default code example:</h6>
-                                    <p><code>bower install &lt;package&gt;</code></p>
-                                    <p><code>npm install &lt;package&gt;</code></p>
-                                </div><!--//code-block-->
-                            </div><!--//section-block-->
-                            <div id="step2"  class="section-block">
-                                <h3 class="block-title">Step Two</h3>
+                                
+                                <h5>Steps:</h5>
+                                <ol>
+                                    <li>Clone the repository <code class="language-git">git clone https://github.com/hutchresearch/latex2speech.git</code>
+                                    </li><br>
+                                    <li>Create a virtual environment <code class="language-git">python3 -m venv env</code> then run your virtual environment <code class = "language-git">source env/bin/activate</code></li><br>
+                                    <li>cd into latex2speech/tex2speech folder and run the requirements.txt page with the command <code class = "language-git">pip3 install -r requirements.txt</code> which installs other dependencies needed.</li><br>
+                                    <li>Install the AWS CLI by running <code class = "language-git">pip3 install awscli</code> then run <code class = "language-git">aws configure</code>, add in your AWS Secret Key and Access Key. When it prompts you region, add us-east-1.</li><br>
+                                    <li>Create a directory called instance in the latex2speech/tex2speech directory. (Keep the instance directory and everything in it private, do not share. This is in the .gitignore)</li><br>
+                                    <li>Create a file called config.py in the instance directory -> instance/config.py</li><br>
+                                    <li>Create a variable in config.py called SECRET_KEY and assign it a random generated key (string of random charachters)</li><br>
+                                    <li>To run the project locally run <code class = "language-git">python3 application.py</code></li>
+                                </ol>
+                            </div><!-- End of Installation SubSection -->
+
+                            <!-- How To Use SubSection -->
+                            <div id="how-to-use"  class="section-block">
+                                <h3 class="block-title">How To Use</h3>
                                 <p>Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa.
                                 </p>
                                 <div class="row">
@@ -115,7 +124,9 @@
                                         </ol>
                                     </div>
                                 </div><!--//row-->
-                            </div><!--//section-block-->
+                            </div>
+                            <!-- End of How To Use SubSection -->
+
                             <div id="step3"  class="section-block">
                                 <h3 class="block-title">Step Three</h3>
                                 <p>Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis.
