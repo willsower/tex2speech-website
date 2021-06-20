@@ -85,15 +85,6 @@
                                 </ol>
                             </div><!-- End of Installation SubSection -->
 
-                            <!-- How To Use SubSection -->
-                            <div id="how-to-use"  class="section-block">
-                                <h3 class="block-title">How To Use</h3>
-                                <p>
-                                    Blahblah
-                                </p>
-                            </div>
-                            <!-- End of How To Use SubSection -->
-
                             <!-- Demos Section -->
                             <div id="demos"  class="section-block">
                                 <h3 class="block-title">Demos</h3>
@@ -113,29 +104,122 @@
                                     Our application is built using the Flask framework. The user will interact with our web application and upload their files that they want sythesized. Once the application receives the files from the user, the files will be pre processed and then given to our Parser.<br><br>
                                     The Parser converts the LaTeX document into Speech Sythesis Markup Language (SSML). SSML is used since it's a markup language for speech sythesis applications. It allows us to control how words, sentences are pronunced and gives us more control of how the document will be read.<br><br>
                                     Once the Parser converts the files to SSML format, the new SSML document is fed to Amazon Polly which converts it into a .mp3 file. Then stored into an S3 bucket. To access the .mp3 file, a generaged presigned URL is created so the user can interact with the S3 bucket temporarily to grab their audio file which they can then download.<br><br>
-                                    <b>Note: </b> Elastic Beanstalk is used in production matters, currently we do not have the application running on this instance.
+                                    <b>Note: </b> Elastic Beanstalk is used in production matters, currently we do not have the application running on this instance.<br><br>
                                     <img src = "assets/images/architecture.png" height = "400px" width = "600px">
                                 </p>
                                 
                             </div>
 
-                            <!-- Frontend Section -->
-                            <div id="frontend" class="section-block">
-                                <h3 class="block-title">Frontend</h3>
+                            <!-- Web Application Section -->
+                            <div id="web-application" class="section-block">
+                                <h3 class="block-title">Web Application</h3>
                                 <p>
-                                    Frontend Info here
+                                    The Web Application module is what the user will use to interact with our Tex2Speech application. It has many functions such as:
+                                    <ul>
+                                        <li>Users upload LaTeX (.tex), .zip, .tar, and/or .bib files</li>
+                                        <li>Allow users to configure pronunciation settings (eg., pronounce quantities in mathmode, change voice)</li>
+                                        <li>Feed the files to the rest of the parser</li>
+                                        <li>Grab the audio links and display them to the user on the download page</li>
+                                    </ul>
+                                    The application itself is built using the Flask Web Framework which is a lightweight Python framework for building web applications.
                                 </p>
                             </div>
-                            <!-- End of Frontend Section -->
+                            <!-- End of Web Application Section -->
+
+                            <!-- Pre Process Section -->
+                            <div id="pre-process" class="section-block">
+                                <h3 class="block-title">Pre Processesing</h3>
+                                <p>
+                                    Pre process Info here
+                                </p>
+                            </div>
+                            <!-- End of Pre Process Section -->
 
                             <!-- Backend Section -->
-                            <div id="backend" class="section-block">
-                                <h3 class="block-title">Backend</h3>
+                            <div id="tex-parser" class="section-block">
+                                <h3 class="block-title">Tex Parser</h3>
                                 <p>
-                                    Backend Info here
+                                    The TexParser is what converts the LaTeX files into SSML files. Its function is similar to a LaTeX to pdf compiler, except that its goal is to parse LaTeX into a stream of text, marked up with SSML, for use in text-to-speech generation. To do this, we use the help of <a href="https://texsoup.alvinwan.com/">TexSoup</a> to easily navigate and modify the LaTeX documents.
                                 </p>
+                                <h5>Storing Supported LaTeX Commands</h5>
+                                <p>We designed a system that was both robust and flexible enough to effectively cover many possible conversion scenarios, while still being feasible to implement. An external XML file is used to actually specify how every command, environment, and command within an environment should be said via SSML. To use this XML file, we decided on creating a MVC design that used an intermediate database to handle all parsing of the XML file. This is not only done to separate code and leave flexibility to change the database implementation, but the conversion database also creates all the SSMLElement objects that are used to create the SSMLElement tree.<br><br>
+
+                                Creating an intermediate SSMLElement tree from our own proprietary objects was a decision made for the following reasons:</p>
+
+                                <ol>
+                                    <li>Both the LaTeX that the parser will reference and the eventual desired output will be in the form of trees (accomplished with TexSoup for the LaTeX and python's ElementTree package for the output XML).</li>
+                                    <li>More advanced resolution of nested elements requires us to create our own tree structure to manually decide how to resolve each nested element.</li>
+                                    <li>It allows us to decide what common SSML elements we'll have to support</li>
+                                    <li>Creating our own classes allows us flexibility to design classes for solving implementation specific problems as they arise.</li>
+                                </ol>
+
+                                <p>SSMLElements were designed with their eventual final form as a python ElementTree in mind, the most significant consequence of which is the headText and tailText attributes. This has a 1 to 1 correspondence with how the ElementTree package stores text within/after a XML node, and so makes it easier for us to convert each node to an XML node afterward. The structure of the classes used in the SSMLElement tree are noted in the following UML diagram:</p>
+                                <img src = "assets/images/SSMLUMLDiagram.png" height = "550px" width = "700px">
+
+                                <h5>Pronunciation XML Structure</h5>
+                                <p>Under the root LaTeX node there can be either &lt;cmd&gt; or &lt;env&gt; tags. The corresponding name must be specified as an attribute. Inside the cmd nodes any SSML elements can be used, along with the tags &lt;text&gt; or &lt;arg&gt;. Inside env nodes there are two separator tags called &lt;says&gt; and &lt;defines&gt;, where &lt;says&gt; defines how the environment will be read out and &lt;defines&gt; defines (or redefines) commands within the specific environment. Within the &lt;says&gt; tag, a &lt;content&gt; tag must be used to denote the relative position of the environments contents.</p>
+
+                                <h6>Example XML Definition</h6>
+                                <pre>
+                                    <code>
+Sample
+&lt;latex&gt;
+    &lt;cmd name=”foo” type = "none" family = ""&gt;
+        asdf
+        &lt;prosody strength=”strong”&gt;
+            more text
+            &lt;arg num=”2”/&gt;
+        &lt;/prosody&gt;
+        &lt;arg num=”1”&gt;
+    &lt;/cmd&gt;
+
+    &lt;env name=”bar” type = "none" family = ""&gt;
+        &lt;says&gt;
+            &lt;break time=”3ms”/&gt;
+            qwerty
+            &lt;content/&gt;
+            &lt;arg num=”3”&gt;
+        &lt;/says&gt;
+        &lt;defines&gt;
+            &lt;cmd name=”baz” type = "none" family = ""&gt;
+                buz
+            &lt;/cmd&gt;
+        &lt;/defines&gt;
+    &lt;/env&gt;
+&lt;/latex&gt;
+                                    </code>
+                                </pre>
+                                <p>From the following LaTeX...</p>
+                                <pre>
+                                    <code>
+\foo{a}{b}  
+\begin{bar}{c}{d}{e}  
+    I’m just some text  
+    \baz  
+\end{bar}
+                                    </code>
+                                </pre>
+
+                                <p>... the parser should generate ...</p>
+
+                                <code>
+                                    <pre>
+&lt;speak&gt;
+asdf
+&lt;prosody strength=”strong”&gt;
+b
+&lt;/prosody&gt;
+a
+&lt;break time=”3ms”/&gt;
+qwerty
+I’m just some text
+buz
+e
+&lt;/speak&gt;
+                                    </pre>
+                                </code>
                             </div>
-                            <!-- End of Backend Section -->
+                            <!-- End of TexParser Section -->
 
                             <!-- Mathmode Section -->
                             <div id="mathmode" class="section-block">
@@ -145,8 +229,48 @@
                                 </p>
                             </div>
                             <!-- End of Mathmode Section -->
+
+                            <!-- Post Process Section -->
+                            <div id="post-process" class="section-block">
+                                <h3 class="block-title">Post Processing</h3>
+                                <p>
+                                    Post Processing stuff here
+                                </p>
+                            </div>
+                            <!-- End of Post Process Section -->
+
+                            <!-- Speech Sythesis Section -->
+                            <div id="speech-sythesis" class="section-block">
+                                <h3 class="block-title">Speech Sythesis</h3>
+                                <p>
+                                    Speech Sythesis
+                                </p>
+                            </div>
+                            <!-- End of Speech Sytehsis Section -->
                         </section>
                         <!-- End of Architecture Section -->
+
+                        <!-- Features Section -->
+                        <section id="features" class="doc-section">
+                            <h2 class="section-title">Features</h2>
+                            <div class="section-block">
+                                <p>
+                                    Features here
+                                </p>
+                            </div>
+                        </section>
+                        <!-- End of Features Section -->
+
+                        <!-- Testing Section -->
+                        <section id="testing" class="doc-section">
+                            <h2 class="section-title">Testing</h2>
+                            <div class="section-block">
+                                <p>
+                                    Testing info here 
+                                </p>
+                            </div>
+                        </section>
+                        <!-- End of Testing Section -->
 
                         <!-- Contributing Section -->
                         <section id="contributing" class="doc-section">
@@ -169,16 +293,19 @@
                                 <a class="nav-link scrollto" href="#getting-started-section">Getting Started</a>
                                 <nav class="doc-sub-menu nav flex-column">
                                     <a class="nav-link scrollto" href="#installation">Installation</a>
-                                    <a class="nav-link scrollto" href="#how-to-use">How to Use</a>
                                     <a class="nav-link scrollto" href="#demos">Demos</a>
                                 </nav><!--//nav-->
                                 <a class="nav-link scrollto" href="#architecture">Architecture</a>
                                 <nav class="doc-sub-menu nav flex-column">
-                                    <a class="nav-link scrollto" href="#frontend">Frontend</a>
-                                    <a class="nav-link scrollto" href="#backend">Backend</a>
+                                    <a class="nav-link scrollto" href="#web-application">Web Application</a>
+                                    <a class="nav-link scrollto" href="#pre-process">Pre Process</a>
+                                    <a class="nav-link scrollto" href="#tex-parser">Tex Parser</a>
                                     <a class="nav-link scrollto" href="#mathmode">Mathmode</a>
+                                    <a class="nav-link scrollto" href="#post-process">Post Process</a>
+                                    <a class="nav-link scrollto" href="#speech-sythesis">Speech Sythesis</a>
                                 </nav><!--//nav-->
                                 <a class="nav-link scrollto" href="#features">Features</a>
+                                <a class="nav-link scrollto" href="#testing">Testing</a>
                                 <a class="nav-link scrollto" href="#contributing">Contributing</a>
                             </nav><!--//doc-menu-->
                         
