@@ -139,7 +139,7 @@
                             <div id="tex-parser" class="section-block">
                                 <h3 class="block-title">Tex Parser</h3>
                                 <p>
-                                    The TexParser is what converts the LaTeX files into SSML files. Its function is similar to a LaTeX to pdf compiler, except that its goal is to parse LaTeX into a stream of text, marked up with SSML, for use in text-to-speech generation. To do this, we use the help of <a href="https://texsoup.alvinwan.com/">TexSoup</a> to easily navigate and modify the LaTeX documents.
+                                    The TexParser is what converts the LaTeX files into SSML files. Its function is similar to a LaTeX to pdf compiler, except that its goal is to parse LaTeX into a stream of text, marked up with SSML, for use in text-to-speech generation. To do this, we use the help of <a href="https://texsoup.alvinwan.com/">TexSoup</a> to easily navigate and modify the LaTeX documents. The input LaTeX files into TexParser have been preprocessed through the previous module.
                                 </p>
                                 <h5>Storing Supported LaTeX Commands</h5>
                                 <p>We designed a system that was both robust and flexible enough to effectively cover many possible conversion scenarios, while still being feasible to implement. An external XML file is used to actually specify how every command, environment, and command within an environment should be said via SSML. To use this XML file, we decided on creating a MVC design that used an intermediate database to handle all parsing of the XML file. This is not only done to separate code and leave flexibility to change the database implementation, but the conversion database also creates all the SSMLElement objects that are used to create the SSMLElement tree.<br><br>
@@ -157,7 +157,9 @@
                                 <img src = "assets/images/SSMLUMLDiagram.png" height = "550px" width = "700px">
 
                                 <h5>Pronunciation XML Structure</h5>
-                                <p>Under the root LaTeX node there can be either &lt;cmd&gt; or &lt;env&gt; tags. The corresponding name must be specified as an attribute. Inside the cmd nodes any SSML elements can be used, along with the tags &lt;text&gt; or &lt;arg&gt;. Inside env nodes there are two separator tags called &lt;says&gt; and &lt;defines&gt;, where &lt;says&gt; defines how the environment will be read out and &lt;defines&gt; defines (or redefines) commands within the specific environment. Within the &lt;says&gt; tag, a &lt;content&gt; tag must be used to denote the relative position of the environments contents.</p>
+                                <p>Under the root LaTeX node there can be either &lt;cmd&gt; or &lt;env&gt; tags. The corresponding name must be specified as an attribute. The type corresponds to whether it is a table command or mathmode command. If it is not, leave it blank. The family attribute corresponds to configurations. For example LaTeX commands: emph, textbf, em are all type 'bold'. So in these three commands we would have family = "bold". <br><br>
+                                    
+                                Inside the cmd nodes any SSML elements can be used, along with the tags &lt;text&gt; or &lt;arg&gt;. Inside env nodes there are two separator tags called &lt;says&gt; and &lt;defines&gt;, where &lt;says&gt; defines how the environment will be read out and &lt;defines&gt; defines (or redefines) commands within the specific environment. Within the &lt;says&gt; tag, a &lt;content&gt; tag must be used to denote the relative position of the environments contents.</p>
 
                                 <h6>Example XML Definition</h6>
                                 <pre>
@@ -225,8 +227,45 @@ e
                             <div id="mathmode" class="section-block">
                                 <h3 class="block-title">Mathmode</h3>
                                 <p>
-                                    Mathmode Info here
+                                    The mathmode component is what renders LaTeX math commands into SSML format. When TexParser encounters a command that is of type mathmode, the following statement will be thrown into the mathmode component for proper SSML rendering. <br><br>
+
+                                    Building off of <a href="https://github.com/augustt198/latex2sympy">augustt198 latex2sympy</a> project. We use ANTLR to convert the LaTeX mathmode into Sympy objects. Then we convert the Sympy objects into the proper SSML format.<br><br>
+
+                                    The Sympy to SSML portion of this mathmode parser uses XML and the sympy library to parse each object. Documentation in regards to the XML structure can be shown below. When parenthesis are encountered within each sympy math object, we add start parenthesis and end parentheses within the document to ensure that our users can comprehend a math equation.
                                 </p>
+
+                                <h5>Sympy To SSML XML Structure</h5>
+                                <p>Each sympy object supported by sympytossml is represented by an entry in static/sympy_funcs.xml. The tag of this entry must be the name of the sympy class, which can be found on docs.sympy.org. The program will use this entry to parse through the function in a linear fashion. It parses through the XML tags and the args array of the Sympy class in parallel, so the first instance of in the XML element is always the first argument in the Sympy args array, unless it is after a &lt;repeat /&gt; tag.</p>
+
+                                <h6>XML Tags</h6>
+                                <p>
+                                    <span class = "my-code-block">&lt;text&gt;</span> <br>
+                                    Anything inside this tag will be appended to the final string in its entirety. There should be no spaces before or after the text
+                                    <br><br><span class = "my-code-block">&lt;arg \&gt;</span> <br>
+                                    An argument from the sympy function.
+                                    <br><br><span class = "my-code-block">&lt;subarg \&gt;</span> <br>
+                                    An argument from a subarray within the sympy function's main arg array. See Sum for an example.
+                                    <br><br><span class = "my-code-block">&lt;repeat \&gt;</span> <br>
+                                    Sets the repeat point. If this tag is present, when the parser reaches the last XML element, it will loop back here until the end of the Sympy args array is reached.<br><br>
+                                    
+                                    As a convention, text at the beginning of a function does NOT start with "the". For example: &lt;text>integral of&lt;/text&gt; , NOT &lt;text&gt; the integral of&lt;/text&gt; 
+                                </p>
+
+                                <h6>Example:</h6>
+                                <pre>
+                                    <code>
+&lt;!--Name of sympy class that represents addition--&gt; 
+&lt;Add&gt; 
+    &lt;!--Allows an arbitrary number of arguments--&gt;    
+    &lt;arg /&gt;   
+    &lt;!--Everything below this tag will be repeated until there are no more args--&gt;   
+    &lt;repeat /&gt;  
+    &lt;!--No spaces before or after 'plus'--&gt; 
+    &lt;text>plus&lt;/text&gt;  
+    &lt;arg />&gt;  
+&lt;/Add&gt;                                         
+                                    </code>
+                                </pre>
                             </div>
                             <!-- End of Mathmode Section -->
 
