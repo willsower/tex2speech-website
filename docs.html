@@ -130,7 +130,16 @@
                             <div id="pre-process" class="section-block">
                                 <h3 class="block-title">Pre Processesing</h3>
                                 <p>
-                                    Pre process Info here
+                                    Pre processing is done right after the user hits submit when they upload their necessary documents. What's being done in this small module is it's getting all the documents ready to be fed into TexParser. 
+
+                                    Some actions that the pre processing module does is as follows:
+                                    <ul>
+                                        <li>Sperates out main tex files, input tex files, and bib files</li>
+                                        <li>Expands comments /* */ in LaTeX</li>
+                                        <li>Expands labels using pdflatex to generate aux file</li>
+                                        <li>Expands out LaTeX macros for TexParser</li>
+                                        <li>And more</li>
+                                    </ul>
                                 </p>
                             </div>
                             <!-- End of Pre Process Section -->
@@ -273,7 +282,7 @@ e
                             <div id="post-process" class="section-block">
                                 <h3 class="block-title">Post Processing</h3>
                                 <p>
-                                    Post Processing stuff here
+                                    Post processing is necessary after the document is in SSML format. Currently, we have it set to get rid of some various tags. This is due to the fact that some charachters do not process in Amazon Polly and mess up it's rendering causing the file not to render. 
                                 </p>
                             </div>
                             <!-- End of Post Process Section -->
@@ -282,7 +291,9 @@ e
                             <div id="speech-sythesis" class="section-block">
                                 <h3 class="block-title">Speech Sythesis</h3>
                                 <p>
-                                    Speech Sythesis
+                                    The speech sythesis module is what feeds the SSML document into Amazon Polly, outputs to an S3 bucket, and creates the presigned URL so the user can temporarily access their audio file. This is within the aws_polly_render.py file.
+
+                                    After the document gets marked up from TexParser, if the LaTeX file has a corresponding .bib file with it, this is when it gets properly rendered into SSML. The reason we don't render the .bib during TexParser is because the .bib is not LaTeX and TexParser that uses TexSoup only expands LaTeX commands.
                                 </p>
                             </div>
                             <!-- End of Speech Sytehsis Section -->
