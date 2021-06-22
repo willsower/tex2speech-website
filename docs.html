@@ -86,14 +86,14 @@
                                 </ol>
                             </div><!-- End of Installation SubSection -->
 
-                            <!-- Demos Section -->
+                            <!-- Demos SubSection -->
                             <div id="demos"  class="section-block">
                                 <h3 class="block-title">Demos</h3>
                                 <p>
                                     Demo here
                                 </p>
                             </div>
-                            <!-- End of Demos Section -->
+                            <!-- End of Demos SubSection -->
                         </section>
                         <!-- End of Getting Started Section -->
                         
@@ -341,9 +341,78 @@ e
                             <h2 class="section-title">Bugs & Errors That Occur</h2>
                             <div class="section-block">
                                 <p>
-                                    Bugs/Errors
+                                    Bugs are things that shouldn’t happen or need to be fixed, but don't cause the LaTeX file to not properly render. Errors cause the software to terminate execution. Please note the error_log shows a `utf-8` can’t decode byte error. This occurs 22.21% in our failed parsings. This isn’t a concern, and should be taken out of the equation of failure, since this just means that our parser couldn’t grab the contents of the file which is on the file, not our parser.                                    
                                 </p>
                             </div>
+
+                            <!-- TexParser Errors/Bugs SubSection -->
+                            <div id="texparser-error"  class="section-block">
+                                <h3 class="block-title">TexParser Errors/Bugs</h3>
+                                <p>
+                                    <h5>Commands That Don’t Use { } Bug</h5>
+                                    Certain commands such as \item, {\emph stuff}, etc which are not in the traditional format of \command{} do not work well with our parser. \item is currently temporarily done with an if statement to find \item and add all contents afterwards. However, this is not a good solution since there could potentially be nested commands/environments/mathmode that needs to be rendered. {\emph stuff} is a problem since when our parser goes through this, it does not put emphasis tags around the “stuff” component.<br><br>
+                                    
+                                    <h5>Expected “x”, reached end of file Error</h5>
+                                    This is 25.96% of the errors that have currently occurred. Essentially, there are multiple LaTeX commands \newc, \def, \newcommand that users write at the top of their files. These commands allow them to replace a regular environment with a smaller one. For example \newcommand{\beq}{\begin{equation} means that in this LaTeX document, I can use \beq instead of typing out \begin{equation}. However, because of this, when TexSoup sees \begin{equation} in these newcommand, def, etc it gets confused. It believes there should be an associated closing tag, but it can’t find it in the correct position and errors out.<br><br>
+                                    
+                                    <h5>Command \item invalid in math mode Error</h5>
+                                    Occurs 16.45% of the time, from file h2625.tex this occurs when \item is nested within \begin{list}{} \end{list}. There shouldn’t be any math mode involved, could be erroring at that extra {}.<br><br>
+                                    
+                                    <h5>Expected “x”, instead got “y” Error</h5>
+                                    This occurs 4.79% of the time in current files that are erroring. So far, we were able to lessen the occurrence of this error due to some backslash commands that didn’t give a command/environment white space. <br><br>
+                                    
+                                    <h5>Malformed Argument Error</h5>
+                                    Occurs 11.60% from current tests, there are multiple problems that cause this, an example that causes this, is there isn’t enough whitespace between commands. For example \def\t{theta}\def\T{Theta} error out due to this. Instead of them being side by side, the want to be in the following format:<br><br>
+                                    
+                                    <pre><code class="my-code-block">\def\t{\theta}
+
+\def\T{\theta}</code></pre>
+
+                                    <h5>Uncaught Errors</h5>
+                                    12.19% of errors are currently uncaught.
+                                    
+                                    <h5>Other Errors</h5>
+                                    Remaining 6.8% of bugs. There are other errors that were not mentioned on this list from our error_log. You can view them in the \Documentation\GenerateErrorLogs\parse_data\error_log.txt, and they do not occur often, which could mean they are edge cases.
+                                    
+                                </p>
+                            </div>
+                            <!-- End of TexParser Errors/Bugs SubSection -->
+
+                            <!-- Mathmode Errors/Bugs SubSection -->
+                            <div id="mathmode-error"  class="section-block">
+                                <h3 class="block-title">Mathmode Errors/Bugs</h3>
+                                <p>
+                                    <h5>In Proper Math Mode Input Bug</h5>
+                                    Our math mode implementation was ensuring that users would enter ‘proper’ math mode conditions. However, from listening to documents it was realized that users use other characters and commands in math mode for formatting. Sometimes, this confuses our parser which results in incorrect audio for that math expression or a math did not render output. An example of this is, some users would write `$s_2$` which would be read as s underscore two. What was quite common in current LaTeX files, was users would instead write `s$_2$`. <br><br>
+                                    
+                                    This is quite common with other math mode commands, where the current parser for math mode that is implemented does not recognize one sided expressions. These expressions include, but are not limited to: $_2$, $^2$, $> 2$, $< 2$, $= 2$.<br><br>
+                                    
+                                    Since our current implementation only supports basic math mode commands, harder math mode equations sometimes result in an error in the math mode parser which could be expanded upon.<br><br>
+                                    
+                                    <h5>Infinite Loop Error</h5>
+                                    This has been happening very rarely, out of 13,000 files only 2 were found to have an infinite loop. This had to do with mathmode \gcd{} components. Current commands that we know infinite loop: 
+                                    $\gcd(n, r) r$ and $\gcd(C) := \gcd(T_1, \dotsc, T_k)$.<br><br>
+                                    
+                                    <h5>Limit Function</h5>
+                                    When testing limit functions, extra characters are being added to the end of the mathmode rendering. This is due to the Sympy library.
+                                </p>
+                            </div>
+                            <!-- End of Mathmode Errors/Bugs SubSection -->
+
+                            <!-- Other Errors/Bugs SubSection -->
+                            <div id="other-error"  class="section-block">
+                                <h3 class="block-title">Other Errors/Bugs</h3>
+                                <p>
+                                    <h5>Unicode Bug</h5>
+                                    Windows machines will not render some files/zipped files. Looking inside the log this has to do with the windows file system and also due to Unicode errors. Our application was mainly tested on a Linux Shell and MAC operating system which works fine. Here is the logging error of a specific bug:<br><br>
+                                    
+                                    <code class="my-code-block">
+                                        [Mon May 24 01:19:42.135628 2021] [:error] [pid 3286] [remote 172.31.93.62:1509]     return codecs.ascii_decode(input, self.errors)[0]
+                                        [Mon May 24 01:19:42.135637 2021] [:error] [pid 3286] [remote 172.31.93.62:1509] UnicodeDecodeError: 'ascii' codec can't decode byte 0xe2 in position 1814: ordinal not in rang(128)
+                                    </code>
+                                </p>
+                            </div>
+                            <!-- End of Other Errors/Bugs SubSection -->
                         </section>
                         <!-- End of Bugs/Errors Section -->                        
 
@@ -382,6 +451,11 @@ e
                                 <a class="nav-link scrollto" href="#features">Features</a>
                                 <a class="nav-link scrollto" href="#testing">Testing</a>
                                 <a class="nav-link scrollto" href="#bugs-errors">Bugs & Errors</a>
+                                <nav class="doc-sub-menu nav flex-column">
+                                    <a class="nav-link scrollto" href="#texparser-errors">TexParser</a>
+                                    <a class="nav-link scrollto" href="#mathmode-errors">Mathmode</a>
+                                    <a class="nav-link scrollto" href="#other-errors">Other</a>
+                                </nav><!--//nav-->
                                 <a class="nav-link scrollto" href="#contributing">Contributing</a>
                             </nav><!--//doc-menu-->
                         
