@@ -317,11 +317,35 @@ e
                             <h2 class="section-title">Testing</h2>
                             <div class="section-block">
                                 <p>
-                                    Testing info here 
+                                    Extensive unit testing was performed resulting into 77% code coverage. In the future this will be expanded upon. Since we were using python, we created tests using the built-in unittest module, and then used pytest to discover all the tests in the project. We used Test Driven Development (TDD) and BDD to perform seperate tests.<br>
+                                    
+                                    <h5>Integration Testing</h5>
+                                    For integration testing, our primary concern was testing the robustness of our system against the complexities of the LaTeX language. These complexities stem from LaTeX being a highly extensible macro-based language with thousands of user created libraries, along with most LaTeX files being peppered with small syntax errors due to how robust modern LaTeX compilers are. Given these difficulties, we took a broad approach to testing and did integration testing against a massive 122,000 LaTeX files sourced from ArXiV.org. We were able to create a script that automatically ran our full integrated system against these files and logged the results to help with debugging. The only components not included in these tests were the expensive API calls to Amazon Web Services (AWS). Since these calls are only invoked at the very end of our full system, we believe our test results to be a reasonable proxy to our app’s performance, but note that future integration testing with these calls would be beneficial. The results are as follows:<br><br>
+                                    
+                                    April 20, 2021 - The script was run for a full 24 hours, managing to run through only 12,219 files through. We ended the test at this point since only 30.88% of the files ran without major errors and the logs gave us enough information to start a bug-fixing sprint. The error logs associated with this test can be found here.<br><br>
+                                    
+                                    May 4, 2021 - With most of the bugs from our previous test now fixed, we ran our program again through as many files for a day. These new changes yielded a 68% success rate, and useful information was documented about bugs still present. A walkthrough of these remaining bugs are listed in the bug section of this document.<br><br>
+                                    
+                                    <h5>User Testing</h5>
+                                    Since our program produces synthesized human speech as its output, automated testing was far from enough to ensure proper program behavior. The synthesized speech must preserve as much of the paper’s relevant information as possible while simultaneously discarding commands and environments that specify information irrelevant in a listening context. To accomplish this, we performed manual user verification, having each team member listen to a small subset of documents from our 122k LaTeX files and make notes about both where it succeeded and where it struggled. We brought these results on a weekly basis to our client, and used this information to determine how we would further iterate on the software.<br><br>
+                                    
+                                    These tests were performed from May 5 to May 25, and revealed consistent small pronunciation errors in our supported commands and environments, especially within math mode environments. These discoveries forced us to switch from expanding our apps scope to instead focus on improving how the most common commands and environments were pronounced. Typical pronunciation in LaTeX files improved greatly after this, with some of the greatest improvements and challenges occurring in pronunciation of math mode. You can read about our current errors below.
+                                    
                                 </p>
                             </div>
                         </section>
                         <!-- End of Testing Section -->
+
+                        <!-- Bugs/Errors Section -->
+                        <section id="bugs-errors" class="doc-section">
+                            <h2 class="section-title">Bugs & Errors That Occur</h2>
+                            <div class="section-block">
+                                <p>
+                                    Bugs/Errors
+                                </p>
+                            </div>
+                        </section>
+                        <!-- End of Bugs/Errors Section -->                        
 
                         <!-- Contributing Section -->
                         <section id="contributing" class="doc-section">
@@ -357,6 +381,7 @@ e
                                 </nav><!--//nav-->
                                 <a class="nav-link scrollto" href="#features">Features</a>
                                 <a class="nav-link scrollto" href="#testing">Testing</a>
+                                <a class="nav-link scrollto" href="#bugs-errors">Bugs & Errors</a>
                                 <a class="nav-link scrollto" href="#contributing">Contributing</a>
                             </nav><!--//doc-menu-->
                         
