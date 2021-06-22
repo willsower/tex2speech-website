@@ -4,6 +4,11 @@
  * Copyright 2014-2020 Froala Labs
  */
 
+ .my-scroll {
+  /* height: 100vh; */
+  overflow-y: scroll;
+}
+
  .my-code-block {
   font: 12px Monaco,"Courier New","DejaVu Sans Mono","Bitstream Vera Sans Mono",monospace;
   color: #52595d;
